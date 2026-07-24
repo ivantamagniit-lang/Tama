@@ -434,7 +434,6 @@
                         <div class="button-group">
                 <button class="btn-add" onclick="tracker.addProduct()">+ Aggiungi Film</button>
                 <button class="btn-reset" onclick="tracker.clearForm()">🧹 Pulisci</button>
-            </div>
         </div>
 
         <div id="productsContainer"></div>
@@ -450,6 +449,7 @@
                 setInterval(() => this.loadProducts(), 30000);
             }
 
+
             async loadProducts() {
                 try {
                     const response = await fetch(`${API_URL}/api/products`);
@@ -461,9 +461,9 @@
                 }
             }
 
-            async addProduct() {
-                const title = document.getElementById('fileTitle').value.trim();
-                const year = document.getElementById('fileYear').value.trim();
+                      async addProduct() {
+                const title = document.getElementById('filmTitle').value.trim();
+                const year = document.getElementById('filmYear').value.trim();
                 const amazonUrl = document.getElementById('amazonUrl').value.trim();
                 const ebayUrl = document.getElementById('ebayUrl').value.trim();
                 const dvdstoreUrl = document.getElementById('dvdstoreUrl').value.trim();
@@ -495,6 +495,7 @@
                     alert('Errore nell\'aggiunta del film: ' + error.message);
                 }
             }
+
 
             async deleteProduct(id) {
                 if (confirm('Sei sicuro di voler eliminare questo film?')) {
