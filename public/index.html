@@ -430,9 +430,9 @@
                 <input type="url" id="dvdstoreUrl" placeholder="https://www.dvdstore.it/...">
             </div>
 
-            <div class="button-group">
-                <button class="btn-add" onclick="addProduct()">➕ Aggiungi Film</button>
-                <button class="btn-reset" onclick="clearForm()">🔄 Pulisci</button>
+                        <div class="button-group">
+                <button class="btn-add" onclick="tracker.addProduct()">+ Aggiungi Film</button>
+                <button class="btn-reset" onclick="tracker.clearForm()">🧹 Pulisci</button>
             </div>
         </div>
 
@@ -461,8 +461,8 @@
             }
 
             async addProduct() {
-                const title = document.getElementById('filmTitle').value.trim();
-                const year = document.getElementById('filmYear').value.trim();
+                const title = document.getElementById('fileTitle').value.trim();
+                const year = document.getElementById('fileYear').value.trim();
                 const amazonUrl = document.getElementById('amazonUrl').value.trim();
                 const ebayUrl = document.getElementById('ebayUrl').value.trim();
                 const dvdstoreUrl = document.getElementById('dvdstoreUrl').value.trim();
@@ -486,7 +486,7 @@
                     });
 
                     if (response.ok) {
-                        alert('✅ Film aggiunto! Il monitoraggio partirà automaticamente.');
+                        alert('🎬 Film aggiunto! Il monitoraggio partirà automaticamente.');
                         this.clearForm();
                         this.loadProducts();
                     }
@@ -528,7 +528,7 @@
                     });
 
                     if (response.ok) {
-                        alert(`✅ Avviso impostato per ${source} a €${alertPrice}!`);
+                        alert(`🔔 Avviso impostato per ${source} a €${alertPrice}!`);
                         this.loadProducts();
                     }
                 } catch (error) {
@@ -538,7 +538,7 @@
 
             updateStats() {
                 document.getElementById('totalProducts').textContent = this.products.length;
-                
+
                 let totalAlerts = 0;
                 this.products.forEach(product => {
                     if (product.alert_price_amazon) totalAlerts++;
@@ -546,7 +546,7 @@
                     if (product.alert_price_dvdstore) totalAlerts++;
                 });
                 document.getElementById('totalAlerts').textContent = totalAlerts;
-                
+
                 const now = new Date();
                 document.getElementById('lastUpdate').textContent = 
                     `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
@@ -554,9 +554,9 @@
 
             render() {
                 const container = document.getElementById('productsContainer');
-                
+
                 if (this.products.length === 0) {
-                    container.innerHTML = '<div class="empty-state">📭 Nessun film monitorato. Aggiungi il tuo primo Blu-ray!</div>';
+                    container.innerHTML = '<div class="empty-state">🎬 Nessun film monitorato. Aggiungi il tuo primo Blu-ray!</div>';
                     return;
                 }
 
@@ -566,24 +566,24 @@
             renderProduct(product) {
                 return `
                     <div class="product-card" data-id="${product.id}">
-                        <div class="product-title">${product.title}${product.year ? ` (${product.year})` : ''}</div>
+                        <div class="product-title">${product.title} ${product.year ? `(${product.year})` : ''}</div>
 
                         <div class="price-grid">
                             <div class="price-box">
                                 <div class="price-source">Amazon</div>
-                                <div class="price-current">${product.latest_amazon ? '€' + product.latest_amazon.toFixed(2) : '—'}</div>
+                                <div class="price-current">${product.latest_amazon ? '€' + product.latest_amazon.toFixed(2) : 'N/D'}</div>
                                 ${product.min_amazon && product.min_amazon < (product.latest_amazon || Infinity) ? 
                                     `<div class="price-min">Min: €${product.min_amazon.toFixed(2)}</div>` : ''}
                             </div>
                             <div class="price-box">
                                 <div class="price-source">eBay</div>
-                                <div class="price-current">${product.latest_ebay ? '€' + product.latest_ebay.toFixed(2) : '—'}</div>
+                                <div class="price-current">${product.latest_ebay ? '€' + product.latest_ebay.toFixed(2) : 'N/D'}</div>
                                 ${product.min_ebay && product.min_ebay < (product.latest_ebay || Infinity) ? 
                                     `<div class="price-min">Min: €${product.min_ebay.toFixed(2)}</div>` : ''}
                             </div>
                             <div class="price-box">
                                 <div class="price-source">DVD Store</div>
-                                <div class="price-current">${product.latest_dvdstore ? '€' + product.latest_dvdstore.toFixed(2) : '—'}</div>
+                                <div class="price-current">${product.latest_dvdstore ? '€' + product.latest_dvdstore.toFixed(2) : 'N/D'}</div>
                                 ${product.min_dvdstore && product.min_dvdstore < (product.latest_dvdstore || Infinity) ? 
                                     `<div class="price-min">Min: €${product.min_dvdstore.toFixed(2)}</div>` : ''}
                             </div>
@@ -591,10 +591,10 @@
 
                         ${product.amazon_url || product.ebay_url || product.dvdstore_url ? `
                             <div class="url-section">
-                                <strong style="font-size: 0.9em; color: #666;">URL Monitorati:</strong>
-                                ${product.amazon_url ? `<div style="margin-top: 5px;"><small><a href="${product.amazon_url}" target="_blank" style="color: #667eea; text-decoration: none;">🔗 Amazon</a></small></div>` : ''}
-                                ${product.ebay_url ? `<div><small><a href="${product.ebay_url}" target="_blank" style="color: #667eea; text-decoration: none;">🔗 eBay</a></small></div>` : ''}
-                                ${product.dvdstore_url ? `<div><small><a href="${product.dvdstore_url}" target="_blank" style="color: #667eea; text-decoration: none;">🔗 DVD Store</a></small></div>` : ''}
+                                <strong>URL Monitorati:</strong>
+                                ${product.amazon_url ? `<div style="margin-top: 5px;"><small><a href="${product.amazon_url}" target="_blank">Amazon</a></small></div>` : ''}
+                                ${product.ebay_url ? `<div style="margin-top: 5px;"><small><a href="${product.ebay_url}" target="_blank">eBay</a></small></div>` : ''}
+                                ${product.dvdstore_url ? `<div style="margin-top: 5px;"><small><a href="${product.dvdstore_url}" target="_blank">DVD Store</a></small></div>` : ''}
                             </div>
                         ` : ''}
 
@@ -608,13 +608,13 @@
                                     <option value="dvdstore">DVD Store</option>
                                 </select>
                             </div>
-                            <button class="btn-set-alert" onclick="tracker.setAlert(${product.id}, document.querySelector('[data-id=\'${product.id}\'] .alert-source').value, document.querySelector('[data-id=\'${product.id}\'] .alert-price').value)">🔔 Imposta Avviso</button>
+                            <button class="btn-set-alert" onclick="tracker.setAlert(${product.id}, this.previousElementSibling.querySelector('select').value, this.previousElementSibling.querySelector('input').value)">Imposta Avviso</button>
 
                             ${product.alert_price_amazon || product.alert_price_ebay || product.alert_price_dvdstore ? `
                                 <div class="alert-badges">
-                                    ${product.alert_price_amazon ? `<div class="alert-badge">Amazon: €${product.alert_price_amazon.toFixed(2)}</div>` : ''}
-                                    ${product.alert_price_ebay ? `<div class="alert-badge">eBay: €${product.alert_price_ebay.toFixed(2)}</div>` : ''}
-                                    ${product.alert_price_dvdstore ? `<div class="alert-badge">DVD Store: €${product.alert_price_dvdstore.toFixed(2)}</div>` : ''}
+                                    ${product.alert_price_amazon ? `<div class="alert-badge">Amazon: €${product.alert_price_amazon}</div>` : ''}
+                                    ${product.alert_price_ebay ? `<div class="alert-badge">eBay: €${product.alert_price_ebay}</div>` : ''}
+                                    ${product.alert_price_dvdstore ? `<div class="alert-badge">DVD Store: €${product.alert_price_dvdstore}</div>` : ''}
                                 </div>
                             ` : ''}
                         </div>
@@ -625,8 +625,16 @@
             }
 
             clearForm() {
-                document.getElementById('filmTitle').value = '';
-                document.getElementById('filmYear').value = '';
+                document.getElementById('fileTitle').value = '';
+                document.getElementById('fileYear').value = '';
                 document.getElementById('amazonUrl').value = '';
                 document.getElementById('ebayUrl').value = '';
-                document.getElementById('dvd
+                document.getElementById('dvdstoreUrl').value = '';
+            }
+        }
+
+        // Inizializza l'applicazione
+        const tracker = new BlurayTracker();
+    </script>
+</body>
+</html>
