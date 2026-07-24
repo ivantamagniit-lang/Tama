@@ -186,4 +186,7 @@ app.post('/api/products', (req, res) => {
         [title, year, amazon_url, ebay_url, dvdstore_url],
         function(err) {
             if (err) res.status(500).json({ error: err.message });
-            else res.json({ id
+                    else res.json({ id: this.lastID });
+    });
+});
+
