@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blu-ray Price Tracker - Cloud</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 8px 15px;
+            background: #4caf50;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .input-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 0.5fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        input {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        button {
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-add {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            grid-column: 1 / -1;
+        }
+
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-reset {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-reset:hover {
+            background: #e0e0e0;
+        }
+
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #999;
+            font-size: 0.9em;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+        }
+
+        .product-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .product-title {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 15px;
+            word-break: break-word;
+        }
+
+        .price-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .price-box {
+            background: #f9f9f9;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 3px solid #667eea;
+        }
+
+        .price-source {
+            font-size: 0.85em;
+            color: #999;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .price-current {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .price-min {
+            font-size: 0.8em;
+            color: #4caf50;
+            margin-top: 3px;
+        }
+
+        .url-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .url-input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+        }
+
+        .alert-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .alert-input-group {
+            display: grid;
+            grid-template-columns: 1fr 0.5fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .alert-input-group input {
+            padding: 8px;
+            font-size: 0.9em;
+        }
+
+        .alert-input-group select {
+            padding: 8px;
+            font-size: 0.9em;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+        }
+
+        .btn-set-alert {
+            background: #ff9800;
+            color: white;
+            padding: 8px;
+            font-size: 0.9em;
+            width: 100%;
+        }
+
+        .btn-set-alert:hover {
+            background: #f57c00;
+        }
+
+        .alert-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .alert-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: #ff9800;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.75em;
+            font-weight: 600;
+        }
+
+        .btn-delete {
+            background: #f44336;
+            color: white;
+            width: 100%;
+            margin-top: 15px;
+            font-size: 0.9em;
+        }
+
+        .btn-delete:hover {
+            background: #d32f2f;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 40px;
+            color: #999;
+            font-size: 1.2em;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .monitoring-info {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            color: #1976d2;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .price-grid {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📀 Blu-ray Price Tracker Cloud</h1>
+            <p>Monitora automaticamente i prezzi 24/7</p>
+            <div class="status-badge">✅ Sistema Online</div>
+        </header>
+
+        <div class="monitoring-info">
+            🤖 <strong>Monitoraggio automatico attivo:</strong> I prezzi vengono verificati ogni ora. Riceverai un'email quando un prezzo scende sotto il tuo limite!
+        </div>
+
+        <div class="stats-section">
+            <div class="stat-card">
+                <div class="stat-value" id="totalProducts">0</div>
+                <div class="stat-label">Film Monitorati</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalAlerts">0</div>
+                <div class="stat-label">Avvisi Attivi</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="lastUpdate">--:--</div>
+                <div class="stat-label">Ultimo Aggiornamento</div>
+            </div>
+        </div>
+
+        <div class="input-section">
+            <h2 style="margin-bottom: 20px; color: #333;">➕ Aggiungi Nuovo Film</h2>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="filmTitle">Titolo Film</label>
+                    <input type="text" id="filmTitle" placeholder="Es: Dune Part Two">
+                </div>
+                <div class="form-group">
+                    <label for="filmYear">Anno</label>
+                    <input type="text" id="filmYear" placeholder="Es: 2024">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="amazonUrl">Link Amazon (opzionale)</label>
+                <input type="url" id="amazonUrl" placeholder="https://www.amazon.com/...">
+            </div>
+
+            <div class="form-group">
+                <label for="ebayUrl">Link eBay (opzionale)</label>
+                <input type="url" id="ebayUrl" placeholder="https://www.ebay.com/...">
+            </div>
+
+            <div class="form-group">
+                <label for="dvdstoreUrl">Link DVD Store (opzionale)</label>
+                <input type="url" id="dvdstoreUrl" placeholder="https://www.dvdstore.it/...">
+            </div>
+
+            <div class="button-group">
+                <button class="btn-add" onclick="addProduct()">➕ Aggiungi Film</button>
+                <button class="btn-reset" onclick="clearForm()">🔄 Pulisci</button>
+            </div>
+        </div>
+
+        <div id="productsContainer"></div>
+    </div>
+
+    <script>
+        const API_URL = window.location.origin;
+
+        class BlurayTracker {
+            constructor() {
+                this.products = [];
+                this.loadProducts();
+                setInterval(() => this.loadProducts(), 30000);
+            }
+
+            async loadProducts() {
+                try {
+                    const response = await fetch(`${API_URL}/api/products`);
+                    this.products = await response.json();
+                    this.render();
+                    this.updateStats();
+                } catch (error) {
+                    console.error('Error loading products:', error);
+                }
+            }
+
+            async addProduct() {
+                const title = document.getElementById('filmTitle').value.trim();
+                const year = document.getElementById('filmYear').value.trim();
+                const amazonUrl = document.getElementById('amazonUrl').value.trim();
+                const ebayUrl = document.getElementById('ebayUrl').value.trim();
+                const dvdstoreUrl = document.getElementById('dvdstoreUrl').value.trim();
+
+                if (!title) {
+                    alert('Inserisci il titolo del film!');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`${API_URL}/api/products`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            title,
+                            year,
+                            amazon_url: amazonUrl,
+                            ebay_url: ebayUrl,
+                            dvdstore_url: dvdstoreUrl
+                        })
+                    });
+
+                    if (response.ok) {
+                        alert('✅ Film aggiunto! Il monitoraggio partirà automaticamente.');
+                        this.clearForm();
+                        this.loadProducts();
+                    }
+                } catch (error) {
+                    alert('Errore nell\'aggiunta del film: ' + error.message);
+                }
+            }
+
+            async deleteProduct(id) {
+                if (confirm('Sei sicuro di voler eliminare questo film?')) {
+                    try {
+                        const response = await fetch(`${API_URL}/api/products/${id}`, {
+                            method: 'DELETE'
+                        });
+
+                        if (response.ok) {
+                            this.loadProducts();
+                        }
+                    } catch (error) {
+                        alert('Errore nell\'eliminazione: ' + error.message);
+                    }
+                }
+            }
+
+            async setAlert(productId, source, alertPrice) {
+                if (!alertPrice) {
+                    alert('Inserisci un prezzo!');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`${API_URL}/api/products/${productId}/alert`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            source,
+                            alertPrice: parseFloat(alertPrice)
+                        })
+                    });
+
+                    if (response.ok) {
+                        alert(`✅ Avviso impostato per ${source} a €${alertPrice}!`);
+                        this.loadProducts();
+                    }
+                } catch (error) {
+                    alert('Errore nell\'impostazione dell\'avviso: ' + error.message);
+                }
+            }
+
+            updateStats() {
+                document.getElementById('totalProducts').textContent = this.products.length;
+                
+                let totalAlerts = 0;
+                this.products.forEach(product => {
+                    if (product.alert_price_amazon) totalAlerts++;
+                    if (product.alert_price_ebay) totalAlerts++;
+                    if (product.alert_price_dvdstore) totalAlerts++;
+                });
+                document.getElementById('totalAlerts').textContent = totalAlerts;
+                
+                const now = new Date();
+                document.getElementById('lastUpdate').textContent = 
+                    `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            }
+
+            render() {
+                const container = document.getElementById('productsContainer');
+                
+                if (this.products.length === 0) {
+                    container.innerHTML = '<div class="empty-state">📭 Nessun film monitorato. Aggiungi il tuo primo Blu-ray!</div>';
+                    return;
+                }
+
+                container.innerHTML = this.products.map(product => this.renderProduct(product)).join('');
+            }
+
+            renderProduct(product) {
+                return `
+                    <div class="product-card" data-id="${product.id}">
+                        <div class="product-title">${product.title}${product.year ? ` (${product.year})` : ''}</div>
+
+                        <div class="price-grid">
+                            <div class="price-box">
+                                <div class="price-source">Amazon</div>
+                                <div class="price-current">${product.latest_amazon ? '€' + product.latest_amazon.toFixed(2) : '—'}</div>
+                                ${product.min_amazon && product.min_amazon < (product.latest_amazon || Infinity) ? 
+                                    `<div class="price-min">Min: €${product.min_amazon.toFixed(2)}</div>` : ''}
+                            </div>
+                            <div class="price-box">
+                                <div class="price-source">eBay</div>
+                                <div class="price-current">${product.latest_ebay ? '€' + product.latest_ebay.toFixed(2) : '—'}</div>
+                                ${product.min_ebay && product.min_ebay < (product.latest_ebay || Infinity) ? 
+                                    `<div class="price-min">Min: €${product.min_ebay.toFixed(2)}</div>` : ''}
+                            </div>
+                            <div class="price-box">
+                                <div class="price-source">DVD Store</div>
+                                <div class="price-current">${product.latest_dvdstore ? '€' + product.latest_dvdstore.toFixed(2) : '—'}</div>
+                                ${product.min_dvdstore && product.min_dvdstore < (product.latest_dvdstore || Infinity) ? 
+                                    `<div class="price-min">Min: €${product.min_dvdstore.toFixed(2)}</div>` : ''}
+                            </div>
+                        </div>
+
+                        ${product.amazon_url || product.ebay_url || product.dvdstore_url ? `
+                            <div class="url-section">
+                                <strong style="font-size: 0.9em; color: #666;">URL Monitorati:</strong>
+                                ${product.amazon_url ? `<div style="margin-top: 5px;"><small><a href="${product.amazon_url}" target="_blank" style="color: #667eea; text-decoration: none;">🔗 Amazon</a></small></div>` : ''}
+                                ${product.ebay_url ? `<div><small><a href="${product.ebay_url}" target="_blank" style="color: #667eea; text-decoration: none;">🔗 eBay</a></small></div>` : ''}
+                                ${product.dvdstore_url ? `<div><small><a href="${product.dvdstore_url}" target="_blank" style="color: #667eea; text-decoration: none;">🔗 DVD Store</a></small></div>` : ''}
+                            </div>
+                        ` : ''}
+
+                        <div class="alert-section">
+                            <label style="margin-bottom: 10px;"><strong>🔔 Imposta Avviso Prezzo</strong></label>
+                            <div class="alert-input-group">
+                                <input type="number" class="alert-price" placeholder="Es: 15.99" step="0.01">
+                                <select class="alert-source">
+                                    <option value="amazon">Amazon</option>
+                                    <option value="ebay">eBay</option>
+                                    <option value="dvdstore">DVD Store</option>
+                                </select>
+                            </div>
+                            <button class="btn-set-alert" onclick="tracker.setAlert(${product.id}, document.querySelector('[data-id=\'${product.id}\'] .alert-source').value, document.querySelector('[data-id=\'${product.id}\'] .alert-price').value)">🔔 Imposta Avviso</button>
+
+                            ${product.alert_price_amazon || product.alert_price_ebay || product.alert_price_dvdstore ? `
+                                <div class="alert-badges">
+                                    ${product.alert_price_amazon ? `<div class="alert-badge">Amazon: €${product.alert_price_amazon.toFixed(2)}</div>` : ''}
+                                    ${product.alert_price_ebay ? `<div class="alert-badge">eBay: €${product.alert_price_ebay.toFixed(2)}</div>` : ''}
+                                    ${product.alert_price_dvdstore ? `<div class="alert-badge">DVD Store: €${product.alert_price_dvdstore.toFixed(2)}</div>` : ''}
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <button class="btn-delete" onclick="tracker.deleteProduct(${product.id})">🗑️ Elimina</button>
+                    </div>
+                `;
+            }
+
+            clearForm() {
+                document.getElementById('filmTitle').value = '';
+                document.getElementById('filmYear').value = '';
+                document.getElementById('amazonUrl').value = '';
+                document.getElementById('ebayUrl').value = '';
+                document.getElementById('dvd
