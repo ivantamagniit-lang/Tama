@@ -184,9 +184,13 @@ app.post('/api/products', (req, res) => {
         `INSERT INTO products (title, year, amazon_url, ebay_url, dvdstore_url) 
          VALUES (?, ?, ?, ?, ?)`,
         [title, year, amazon_url, ebay_url, dvdstore_url],
-        function(err) {
+                function(err) {
             if (err) res.status(500).json({ error: err.message });
-                    else res.json({ id: this.lastID });
-    });
+            else res.json({ id: this.lastID });
+        }
+    );
 });
 
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
